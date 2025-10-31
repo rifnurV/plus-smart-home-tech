@@ -13,10 +13,9 @@ import java.util.List;
 
 @Getter
 @Setter
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ScenarioAddedEvent extends HubEvent {
     @NotBlank
-    String name;
+    private String name;
     @NotNull
     @NotEmpty
     private List<ScenarioCondition> conditions;

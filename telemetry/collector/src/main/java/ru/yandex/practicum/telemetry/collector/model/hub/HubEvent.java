@@ -28,11 +28,10 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public abstract class HubEvent {
     @NotBlank
-    String hubId;
-    Instant timestamp = Instant.now();
+    private String hubId;
+    private Instant timestamp = Instant.now();
 
     public abstract HubEventType getType();
 

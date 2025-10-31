@@ -9,10 +9,9 @@ import ru.yandex.practicum.telemetry.collector.model.hub.enums.HubEventType;
 
 @Getter
 @Setter
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ScenarioRemovedEvent extends HubEvent {
     @NotBlank
-    String name;
+    private String name;
 
     @Override
     public HubEventType getType() {

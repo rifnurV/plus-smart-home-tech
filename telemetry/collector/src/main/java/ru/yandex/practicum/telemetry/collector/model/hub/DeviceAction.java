@@ -15,6 +15,6 @@ public class DeviceAction {
     @NotBlank
     String sensorId;
     @NotNull
-    ActionType actionType;
+    ActionType type;
     Integer value;
 }

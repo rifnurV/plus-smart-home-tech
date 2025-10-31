@@ -10,11 +10,10 @@ import ru.yandex.practicum.telemetry.collector.model.hub.enums.HubEventType;
 
 @Getter
 @Setter
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DeviceAddedEvent extends HubEvent {
     @NotBlank
-    String Id;
-    DeviceType deviceType;
+    private String Id;
+    private DeviceType deviceType;
 
 
     @Override

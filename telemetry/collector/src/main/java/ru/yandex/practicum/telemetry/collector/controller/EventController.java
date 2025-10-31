@@ -40,7 +40,7 @@ public class EventController {
 
     @PostMapping("/sensors")
     public void collectSensorEvent(@Valid @RequestBody SensorEvent request) {
-        log.info("Запрос sensors: {}", request);
+        log.info("POST запрос /events/sensors: {}", request);
         if (sensorEventHandlers.containsKey(request.getType())) {
             sensorEventHandlers.get(request.getType()).handle(request);
         } else {
@@ -50,7 +50,7 @@ public class EventController {
 
     @PostMapping("/hubs")
     public void collectHubEvent(@Valid @RequestBody HubEvent request) {
-        log.info("Запрос hubs: {}", request);
+        log.info("POST запрос /events/hubs: {}", request);
         if (hubEventHandlers.containsKey(request.getType())) {
             hubEventHandlers.get(request.getType()).handle(request);
         } else {

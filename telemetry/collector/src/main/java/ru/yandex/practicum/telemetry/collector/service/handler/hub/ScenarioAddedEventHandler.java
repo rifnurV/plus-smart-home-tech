@@ -37,7 +37,7 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
                 .setActions(_event.getActions().stream()
                         .map(action -> DeviceActionAvro.newBuilder()
                                 .setSensorId(action.getSensorId())
-                                .setType(ActionTypeAvro.valueOf(action.getActionType().name()))
+                                .setType(ActionTypeAvro.valueOf(action.getType().name()))
                                 .setValue(action.getValue())
                                 .build())
                         .collect(Collectors.toList())
