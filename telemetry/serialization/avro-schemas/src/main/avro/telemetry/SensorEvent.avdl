@@ -27,6 +27,9 @@ protocol SensorEventProtocol {
 
 	/** Данные с датчика температуры */
 	record TemperatureSensorAvro {
+		string id;
+		string hubId;
+		timestamp_ms timestamp;
 		int temperature_c;
 		int temperature_f;
 	}
@@ -38,10 +41,7 @@ protocol SensorEventProtocol {
 	record SensorEventAvro {
 		string id;
 		string hubId;
-
-		@logicalType("timestamp-millis")
-		long timestamp;
-
+		timestamp_ms timestamp;
 		union {
 			ClimateSensorAvro,
 			LightSensorAvro,
