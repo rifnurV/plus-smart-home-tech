@@ -3,11 +3,9 @@ package ru.yandex.practicum.telemetry.collector.model.hub;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.FieldDefaults;
 import ru.yandex.practicum.telemetry.collector.model.hub.enums.HubEventType;
 
 import java.time.Instant;
