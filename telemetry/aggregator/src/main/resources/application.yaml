@@ -4,7 +4,7 @@ aggregator:
       properties:
         "bootstrap.servers": localhost:9092
         "key.serializer": org.apache.kafka.common.serialization.StringSerializer
-        "value.serializer": ru.yandex.practicum.telemetry.kafka.serializer.GeneralAvroSerializer
+        "value.serializer": ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer
       topic: telemetry.snapshots.v1
 
     consumer:
@@ -13,6 +13,6 @@ aggregator:
         "enable.auto.commit": false
         "group.id": telemetry.aggregator.sensors
         "key.deserializer": org.apache.kafka.common.serialization.StringDeserializer
-        "value.deserializer": ru.yandex.practicum.telemetry.kafka.deserializer.SensorEventDeserializer
+        "value.deserializer": ru.yandex.practicum.kafka.deserializer.SensorEventDeserializer
       topic: telemetry.sensors.v1
       poll-timeout: 100ms
