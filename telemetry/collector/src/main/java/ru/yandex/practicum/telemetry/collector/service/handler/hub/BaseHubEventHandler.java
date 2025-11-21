@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
+//import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.telemetry.collector.service.KafkaEventProducer;
 import ru.yandex.practicum.telemetry.collector.service.handler.HubEventHandler;
+//import ru.yandex.practicum.telemetry.kafka.event.HubEventAvro;
 
 import java.time.Instant;
 

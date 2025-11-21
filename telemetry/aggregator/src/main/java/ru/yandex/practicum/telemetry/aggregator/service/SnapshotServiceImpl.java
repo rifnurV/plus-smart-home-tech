@@ -8,6 +8,7 @@ import ru.yandex.practicum.kafka.telemetry.event.SensorStateAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,67 +17,49 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @RequiredArgsConstructor
 public class SnapshotServiceImpl implements SnapshotService {
-    // Хранилище должно быть потокобезопасным
-    private final Map<String, SensorsSnapshotAvro> snapshots = new ConcurrentHashMap<>();
+    // Хранит снимки состояния
+    private final Map<String, SensorsSnapshotAvro> sensors = new HashMap<>();
 
     @Override
-    public Optional<SensorsSnapshotAvro> updateState(SensorEventAvro eventAvro) {
-        String hubId = eventAvro.getHubId().toString();
-        String sensorId = eventAvro.getId().toString();
-
-        // 1. Получение или создание снапшота
-        final SensorsSnapshotAvro snapshotAvro = snapshots.computeIfAbsent(
-                hubId,
-                k -> SensorsSnapshotAvro.newBuilder()
-                        .setHubId(hubId)
-                        .setTimestamp(eventAvro.getTimestamp())
-                        // Внутреннее состояние также должно быть потокобезопасным
-                        .setSensorsState(new java.util.concurrent.ConcurrentHashMap<>())
-                        .build()
+    public Optional<SensorsSnapshotAvro> updateState(SensorEventAvro event) {
+        // Находим снапшот состояния датчиков конкретного хаба.
+        // Если снэпшот ещё не вычислялся - создаём новый.
+        final SensorsSnapshotAvro snapshot = sensors.computeIfAbsent(
+                event.getHubId(),
+                hubId ->  // создаём новый снапшот
+                        SensorsSnapshotAvro.newBuilder()
+                                .setHubId(hubId)
+                                .setTimestamp(event.getTimestamp())
+                                .setSensorsState(new HashMap<>())
+                                .build()
         );
 
-        Map<String, SensorStateAvro> sensorStateAvros = snapshotAvro.getSensorsState();
-        SensorStateAvro oldSensorStateAvro = sensorStateAvros.get(sensorId);
+        // берём мапу с данными всех устройств данного хаба
+        // и кладём в переменную, для удобства
+        Map<String, SensorStateAvro> sensorsState = snapshot.getSensorsState();
 
-        long eventTimestamp = eventAvro.getTimestamp().toEpochMilli();
-
-        if (oldSensorStateAvro != null) {
-            long oldTimestamp = oldSensorStateAvro.getTimestamp().toEpochMilli();
-
-            // 2. Проверка по времени: игнорируем старые или равные события
-            if (oldTimestamp >= eventTimestamp) {
-                log.trace("Событие от датчика {} игнорировано: старый таймстемп {} новее или равен новому {}",
-                        sensorId, Instant.ofEpochMilli(oldTimestamp), Instant.ofEpochMilli(eventTimestamp));
-                return Optional.empty();
-            }
-
-            // 3. Проверка по данным: игнорируем, если данные не изменились
-            if (oldSensorStateAvro.getPayload().equals(eventAvro.getPayload())) {
-                log.trace("Событие от датчика {} игнорировано: данные не изменились", sensorId);
+        // Если для данного устройства уже были получены данные ранее,
+        // то проверяем изменяют ли новые данные старое состояние
+        if(sensorsState.containsKey(event.getId())) {
+            SensorStateAvro oldState = sensorsState.get(event.getId());
+            // если таймстемп у нового события раньше, чем таймстемп текущего состояния,
+            // или данные нового события ничего не меняют по сравнению с текущими данными,
+            // то игнорируем новое событие и ничего не обновляем
+            if(oldState.getTimestamp().isAfter(event.getTimestamp()) ||
+                    oldState.getPayload().equals(event.getPayload())) {
                 return Optional.empty();
             }
         }
 
-        // 4. Обновление снапшота
-        SensorStateAvro newSensorStateAvro = SensorStateAvro.newBuilder()
-                .setTimestamp(eventAvro.getTimestamp())
-                .setPayload(eventAvro.getPayload())
+        // Если дошли сюда, значит пришли новые данные и
+        // снапшот нужно обновить
+        SensorStateAvro newState = SensorStateAvro.newBuilder()
+                .setTimestamp(event.getTimestamp())
+                .setPayload(event.getPayload())
                 .build();
+        sensorsState.put(event.getId(), newState);
 
-        sensorStateAvros.put(sensorId, newSensorStateAvro);
-
-        // Обновляем метку времени самого снапшота на время последнего полученного события
-        snapshotAvro.setTimestamp(newSensorStateAvro.getTimestamp());
-
-        log.info("Снапшот хаба {} обновлен событием от датчика {}", hubId, sensorId);
-
-        // 5. Возвращаем обновленный снапшот
-        SensorsSnapshotAvro snapshotCopy = SensorsSnapshotAvro.newBuilder()
-                .setHubId(snapshotAvro.getHubId())
-                .setTimestamp(snapshotAvro.getTimestamp())
-                .setSensorsState(new java.util.HashMap<>(snapshotAvro.getSensorsState()))
-                .build();
-
-        return Optional.of(snapshotCopy);
+        snapshot.setTimestamp(newState.getTimestamp());
+        return Optional.of(snapshot);
     }
 }
