@@ -31,13 +31,16 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
                 event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()
         );
 
-        SensorEventAvro eventAvro = SensorEventAvro.newBuilder()
+        SensorEventAvro sensorEventAvro = SensorEventAvro.newBuilder()
                 .setHubId(event.getHubId())
                 .setId(event.getId())
                 .setTimestamp(timestamp)
                 .setPayload(payload)
                 .build();
 
-        producer.send(eventAvro, event.getHubId(), timestamp, SENSORS_EVENTS);
+        System.out.println(String.format("sensorEventAvro: %s, event.getHubId: %s, timestamp: %s, SENSORS_EVENTS: %s",
+                sensorEventAvro, event.getHubId(), timestamp, SENSORS_EVENTS));
+
+        producer.send(sensorEventAvro, event.getHubId(), timestamp, SENSORS_EVENTS);
     }
 }
