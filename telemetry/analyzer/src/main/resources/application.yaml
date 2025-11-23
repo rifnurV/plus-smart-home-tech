@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/analyzer
+    username: root
+    password: root
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+    show-sql: true
+grpc:
+  client:
+    hub-router:
+      address: 'static://localhost:59090'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+analyzer:
+  kafka:
+    common-properties:
+      "bootstrap.servers": localhost:9092
+      "key.deserializer": org.apache.kafka.common.serialization.StringDeserializer
+      "enable.auto.commit": false
+    consumers:
+      - type: SnapshotProcessor
+        properties:
+          "value.deserializer": ru.yandex.practicum.telemetry.kafka.deserializer.SensorsSnapshotDeserializer
+          "group.id": telemetry.analyzer.snapshot
+        topics:
+          - telemetry.snapshots.v1
+        poll-timeout: 500ms
+      - type: HubEventProcessor
+        properties:
+          "value.deserializer": ru.yandex.practicum.telemetry.kafka.deserializer.HubEventDeserializer
+          "group.id": telemetry.analyzer.hub
+        topics:
+          - telemetry.hubs.v1
+        poll-timeout: 5000ms
