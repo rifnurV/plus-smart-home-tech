@@ -28,7 +28,7 @@ analyzer:
           "group.id": telemetry.analyzer.snapshot
         topics:
           - telemetry.snapshots.v1
-        poll-timeout: 500ms
+        poll-timeout: 5000ms
       - type: HubEventProcessor
         properties:
           "value.deserializer": ru.yandex.practicum.telemetry.kafka.deserializer.HubEventDeserializer

@@ -10,7 +10,6 @@ import lombok.Setter;
 @Table(name = "sensors")
 public class Sensor {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     private String hubId;
 }
