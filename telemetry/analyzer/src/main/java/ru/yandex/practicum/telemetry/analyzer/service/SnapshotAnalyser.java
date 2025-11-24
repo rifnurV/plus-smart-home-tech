@@ -18,11 +18,12 @@ import java.time.Instant;
 import java.util.Map;
 
 import static ru.yandex.practicum.grpc.telemetry.hubrouter.HubRouterControllerGrpc.HubRouterControllerBlockingStub;
-import static ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro.TEMPERATURE;
+import static ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro.CO2LEVEL;
+import static ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro.HUMIDITY;
 import static ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro.LUMINOSITY;
 import static ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro.MOTION;
 import static ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro.SWITCH;
-
+import static ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro.TEMPERATURE;
 
 @Slf4j
 @Service
@@ -37,8 +38,10 @@ public class SnapshotAnalyser {
         this.hubRouterClient = hubRouterClient;
     }
 
-    // Находит все сценарии для хаба и выполняет действия, если условия совпали.
     public void process(SensorsSnapshotAvro snapshot) {
+        // Логируем получение снапшота для отладки
+        log.trace("Анализ снапшота для хаба: {}", snapshot.getHubId());
+
         scenarioRepository.findByHubId(snapshot.getHubId())
                 .stream()
                 .filter(scenario -> isConditionsMatchSnapshot(snapshot, scenario.getConditions()))
@@ -47,122 +50,73 @@ public class SnapshotAnalyser {
 
     private boolean isConditionsMatchSnapshot(SensorsSnapshotAvro snapshot, Map<String, Condition> conditions) {
         return conditions.entrySet().stream()
-                .allMatch(conditionEntry ->
-                        checkCondition(conditionEntry.getKey(), conditionEntry.getValue(), snapshot)
-                );
+                .allMatch(entry -> checkCondition(entry.getKey(), entry.getValue(), snapshot));
     }
 
-    // Проверяет соответствие условия текущему состоянию датчика.
     private boolean checkCondition(String sensorId, Condition condition, SensorsSnapshotAvro snapshot) {
-        final SensorStateAvro state = snapshot.getSensorsState().get(sensorId);
+        SensorStateAvro state = snapshot.getSensorsState().get(sensorId);
+        if (state == null) return false;
 
-        if (state == null) {
-            log.trace("Условия для датчика [{}]: состояние не найдено в снапшоте.", sensorId);
-            return false;
-        }
+        Integer valueToCheck = extractValue(state.getPayload(), condition.getType());
 
-        Object sensorValue = extractSensorValue(state.getPayload(), condition.getType());
-
-        if (sensorValue == null) {
-            log.warn("Нет значений типа {} из датчика {}.",
-                    condition.getType(), sensorId);
-            return false;
-        }
-
-        Integer checkValue = convertValueToCheckType(sensorValue);
-
-        return checkValue != null && condition.check(checkValue);
+        // Важно: condition.check должна уметь работать с null, либо мы проверяем здесь
+        return valueToCheck != null && condition.check(valueToCheck);
     }
 
-    //Извлекает значение из конкретного payload Avro в зависимости от требуемого ConditionTypeAvro.
-    private Object extractSensorValue(Object payload, ConditionTypeAvro type) {
+    private Integer extractValue(Object payload, ConditionTypeAvro type) {
         return switch (payload) {
-            case ClimateSensorAvro data -> switch (type) {
-                case TEMPERATURE -> data.getTemperatureC();
-                case CO2LEVEL -> data.getCo2Level();
-                case HUMIDITY -> data.getHumidity();
+            case ClimateSensorAvro p -> switch (type) {
+                case TEMPERATURE -> p.getTemperatureC();
+                case HUMIDITY -> p.getHumidity();
+                case CO2LEVEL -> p.getCo2Level();
                 default -> null;
             };
-            case LightSensorAvro data -> type.equals(LUMINOSITY) ? data.getLuminosity() : null;
-            case MotionSensorAvro data -> type.equals(MOTION) ? data.getMotion() : null;
-            case TemperatureSensorAvro data -> type.equals(TEMPERATURE) ? data.getTemperatureC() : null;
-            case SwitchSensorAvro data -> type.equals(SWITCH) ? data.getState() : null;
+            case TemperatureSensorAvro p -> type == TEMPERATURE ? p.getTemperatureC() : null;
+            case LightSensorAvro p -> type == LUMINOSITY ? p.getLuminosity() : null;
+            case MotionSensorAvro p -> type == MOTION ? (p.getMotion() ? 1 : 0) : null;
+            case SwitchSensorAvro p -> type == SWITCH ? (p.getState() ? 1 : 0) : null;
             default -> null;
         };
     }
 
-    //Конвертирует извлеченное значение в тип Integer, используемый в Condition.check().
-    private Integer convertValueToCheckType(Object value) {
-        if (value == null) {
-            return null;
-        }
-        return switch (value) {
-            case Integer i -> i;
-            case Boolean b -> b ? 1 : 0;
-            case Double d -> d.intValue();
-            case Float f -> f.intValue();
-            default -> {
-                log.warn("Неизвестный тип значения для конвертации в Integer: {}", value.getClass().getName());
-                yield null;
-            }
-        };
-    }
-
-    //Выполняет все действия, связанные со сработавшим сценарием, через gRPC./
     private void performActions(Scenario scenario) {
-        log.info("Сработал сценарий '{}' для хаба [{}]. Выполняю {} действий.",
-                scenario.getName(), scenario.getHubId(), scenario.getActions().size());
+        log.info("⚡ Сценарий выполнился: [{}]", scenario.getName());
 
-        final Timestamp timestamp = buildCurrentTimestamp();
+        Timestamp timestamp = Timestamp.newBuilder()
+                .setSeconds(Instant.now().getEpochSecond())
+                .setNanos(Instant.now().getNano())
+                .build();
 
-        for (Map.Entry<String, Action> actionEntry : scenario.getActions().entrySet()) {
-            Action scenarioAction = actionEntry.getValue();
-            String sensorId = actionEntry.getKey();
-
-            DeviceActionProto deviceAction = buildDeviceAction(sensorId, scenarioAction);
+        for (Map.Entry<String, Action> entry : scenario.getActions().entrySet()) {
+            String sensorId = entry.getKey();
+            Action action = entry.getValue();
 
             try {
-                hubRouterClient.handleDeviceAction(
-                        DeviceActionRequest.newBuilder()
-                                .setHubId(scenario.getHubId())
-                                .setScenarioName(scenario.getName())
-                                .setAction(deviceAction)
-                                .setTimestamp(timestamp)
-                                .build()
-                );
+                // Преобразуем ActionTypeAvro -> ActionTypeProto
+                ActionTypeProto protoType = ActionTypeProto.valueOf(action.getType().name());
+
+                DeviceActionProto.Builder actionBuilder = DeviceActionProto.newBuilder()
+                        .setSensorId(sensorId)
+                        .setType(protoType);
+
+                // Устанавливаем значение, если оно есть
+                if (action.getValue() != null) {
+                    actionBuilder.setValue(action.getValue());
+                }
+
+                hubRouterClient.handleDeviceAction(DeviceActionRequest.newBuilder()
+                        .setHubId(scenario.getHubId())
+                        .setScenarioName(scenario.getName())
+                        .setAction(actionBuilder.build())
+                        .setTimestamp(timestamp)
+                        .build());
+
+                log.info("Отправлено действие на роутер: сенсор {}, тип {}, значение {}",
+                        sensorId, protoType, action.getValue());
+
             } catch (Exception e) {
-                log.error("Ошибка при отправке gRPC действия [{}] для хаба [{}] и устройства [{}].",
-                        scenarioAction.getType().name(), scenario.getHubId(), sensorId, e);
+                log.error("Ошибка при отправке действия для сценария {}: {}", scenario.getName(), e.getMessage(), e);
             }
-        }
-    }
-
-    private Timestamp buildCurrentTimestamp() {
-        Instant ts = Instant.now();
-        return Timestamp.newBuilder()
-                .setSeconds(ts.getEpochSecond())
-                .setNanos(ts.getNano())
-                .build();
-    }
-
-    private DeviceActionProto buildDeviceAction(String sensorId, Action scenarioAction) {
-        DeviceActionProto.Builder actionBuilder = DeviceActionProto.newBuilder()
-                .setSensorId(sensorId)
-                .setType(mapActionType(scenarioAction.getType()));
-
-        if (ActionTypeAvro.SET_VALUE.equals(scenarioAction.getType()) && scenarioAction.getValue() != null) {
-            actionBuilder.setValue(scenarioAction.getValue());
-        }
-
-        return actionBuilder.build();
-    }
-
-    private ActionTypeProto mapActionType(ActionTypeAvro avro) {
-        try {
-            return ActionTypeProto.valueOf(avro.name());
-        } catch (IllegalArgumentException e) {
-            log.error("Неизвестный тип действия Avro: {}", avro.name());
-            throw new IllegalArgumentException("Неизвестный тип действия: " + avro.name());
         }
     }
 }

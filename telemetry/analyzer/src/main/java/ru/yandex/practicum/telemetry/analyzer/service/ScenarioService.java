@@ -135,8 +135,8 @@ public class ScenarioService {
             return null;
         }
 
-        if (value instanceof Integer i) {
-            return i;
+        if (value instanceof Number n) {
+            return n.intValue();
         }
 
         if (value instanceof Boolean b) {
