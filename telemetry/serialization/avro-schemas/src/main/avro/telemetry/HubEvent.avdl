@@ -78,7 +78,10 @@ protocol HubEventProtocol {
 	 */
 	record HubEventAvro {
 		string hub_id;
-		timestamp_ms timestamp;
+
+		@logicalType("timestamp-millis")
+		long timestamp;
+
 		union {
 			DeviceAddedEventAvro,
 			DeviceRemovedEventAvro,
