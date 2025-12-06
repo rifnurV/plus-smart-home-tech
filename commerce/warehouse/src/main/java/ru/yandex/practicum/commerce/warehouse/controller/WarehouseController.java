@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.commerce.shoppingcard.entity.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ShoppingCartDto;
 import ru.yandex.practicum.commerce.warehouse.entity.dto.AddProductToWarehouseRequest;
 import ru.yandex.practicum.commerce.warehouse.entity.dto.AddressDto;
 import ru.yandex.practicum.commerce.warehouse.entity.dto.BookedProductsDto;

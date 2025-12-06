@@ -1,4 +1,4 @@
-package ru.yandex.practicum.commerce.shoppingcard.controller;
+package ru.yandex.practicum.commerce.shoppingcart.controller;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.commerce.shoppingcard.entity.dto.ChangeProductQuantityRequest;
-import ru.yandex.practicum.commerce.shoppingcard.entity.dto.ShoppingCartDto;
-import ru.yandex.practicum.commerce.shoppingcard.service.CartService;
+import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ChangeProductQuantityRequest;
+import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.shoppingcart.service.CartService;
 
 import java.util.List;
 import java.util.Map;

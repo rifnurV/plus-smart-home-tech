@@ -1,4 +1,4 @@
-package ru.yandex.practicum.commerce.shoppingcard.entity.dto;
+package ru.yandex.practicum.commerce.shoppingcart.entity.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.commerce.shoppingcard;
+package ru.yandex.practicum.commerce.shoppingcart;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,8 +8,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "ru.yandex.practicum")
-public class ShoppingCart {
+public class ShoppingCartApp {
     public static void main(String[] args) {
-        SpringApplication.run(ShoppingCart.class, args);
+        SpringApplication.run(ShoppingCartApp.class, args);
     }
 }

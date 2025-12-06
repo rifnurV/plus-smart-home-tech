@@ -1,12 +1,12 @@
-package ru.yandex.practicum.commerce.shoppingcard.controller;
+package ru.yandex.practicum.commerce.shoppingcart.controller;
 
 import feign.FeignException;
 import jakarta.validation.Valid;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.commerce.shoppingcard.entity.dto.ChangeProductQuantityRequest;
-import ru.yandex.practicum.commerce.shoppingcard.entity.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ChangeProductQuantityRequest;
+import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ShoppingCartDto;
 
 import java.util.List;
 import java.util.Map;

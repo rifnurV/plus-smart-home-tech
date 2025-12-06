@@ -1,4 +1,4 @@
-package ru.yandex.practicum.commerce.shoppingcard.entity;
+package ru.yandex.practicum.commerce.shoppingcart.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

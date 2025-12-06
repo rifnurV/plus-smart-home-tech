@@ -1,4 +1,4 @@
-package ru.yandex.practicum.commerce.shoppingcard.service;
+package ru.yandex.practicum.commerce.shoppingcart.service;
 
 import feign.FeignException;
 import jakarta.transaction.Transactional;
@@ -6,11 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.commerce.shoppingcard.entity.ShoppingCart;
-import ru.yandex.practicum.commerce.shoppingcard.entity.dto.ChangeProductQuantityRequest;
-import ru.yandex.practicum.commerce.shoppingcard.entity.dto.ShoppingCartDto;
-import ru.yandex.practicum.commerce.shoppingcard.mapper.CartMapper;
-import ru.yandex.practicum.commerce.shoppingcard.repository.CartRepository;
+import ru.yandex.practicum.commerce.shoppingcart.entity.ShoppingCart;
+import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ChangeProductQuantityRequest;
+import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.shoppingcart.mapper.CartMapper;
+import ru.yandex.practicum.commerce.shoppingcart.repository.CartRepository;
 
 import java.util.HashMap;
 import java.util.List;

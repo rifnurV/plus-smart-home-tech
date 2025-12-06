@@ -5,7 +5,7 @@ import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.commerce.shoppingcard.entity.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ShoppingCartDto;
 import ru.yandex.practicum.commerce.warehouse.entity.BookedProducts;
 import ru.yandex.practicum.commerce.warehouse.entity.WarehouseProduct;
 import ru.yandex.practicum.commerce.warehouse.entity.dto.AddProductToWarehouseRequest;
@@ -26,7 +26,7 @@ public class WarehouseService {
     private final WarehouseMapper warehouseMapper;
 
     private static final String[] ADDRESSES =
-            new String[] {"ADDRESS_1", "ADDRESS_2"};
+            new String[]{"ADDRESS_1", "ADDRESS_2"};
 
     private static final String CURRENT_ADDRESS =
             ADDRESSES[Random.from(new SecureRandom()).nextInt(0, ADDRESSES.length)];
@@ -45,14 +45,14 @@ public class WarehouseService {
         shoppingCartDto.getProducts().forEach((productId, quantity) -> {
             WarehouseProduct warehouseProduct = warehouseRepository.findById(productId).orElseThrow(() -> new ValidationException("Товар не найден"));
             if (warehouseProduct.getQuantity() < quantity) {
-               throw new ValidationException("Товар не найден");
+                throw new ValidationException("Товар не найден");
             }
             bookedProducts.setFragile(bookedProducts.getFragile() || warehouseProduct.getFragile());
             bookedProducts.setDeliveryVolume(bookedProducts.getDeliveryVolume() + warehouseProduct.getWeight()
-                    *warehouseProduct.getDepth()*warehouseProduct.getHeight());
-            bookedProducts.setDeliveryWeight(bookedProducts.getDeliveryWeight() + warehouseProduct.getWeight()*quantity);
+                    * warehouseProduct.getDepth() * warehouseProduct.getHeight());
+            bookedProducts.setDeliveryWeight(bookedProducts.getDeliveryWeight() + warehouseProduct.getWeight() * quantity);
         });
-        return new BookedProductsDto(bookedProducts.getDeliveryWeight(),bookedProducts.getDeliveryVolume(),bookedProducts.getFragile());
+        return new BookedProductsDto(bookedProducts.getDeliveryWeight(), bookedProducts.getDeliveryVolume(), bookedProducts.getFragile());
     }
 
     public void addProductQuantity(AddProductToWarehouseRequest request) throws FeignException {
@@ -62,6 +62,6 @@ public class WarehouseService {
     }
 
     public AddressDto getWarehouseAddress() throws FeignException {
-        return new AddressDto(CURRENT_ADDRESS,CURRENT_ADDRESS,CURRENT_ADDRESS,CURRENT_ADDRESS,CURRENT_ADDRESS);
+        return new AddressDto(CURRENT_ADDRESS, CURRENT_ADDRESS, CURRENT_ADDRESS, CURRENT_ADDRESS, CURRENT_ADDRESS);
     }
 }

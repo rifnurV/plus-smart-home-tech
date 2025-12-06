@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.commerce.shoppingcard.entity.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ShoppingCartDto;
 import ru.yandex.practicum.commerce.warehouse.entity.dto.AddProductToWarehouseRequest;
 import ru.yandex.practicum.commerce.warehouse.entity.dto.AddressDto;
 import ru.yandex.practicum.commerce.warehouse.entity.dto.BookedProductsDto;
