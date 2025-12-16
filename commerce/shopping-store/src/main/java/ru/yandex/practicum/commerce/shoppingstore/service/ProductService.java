@@ -7,11 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.commerce.api.store.dto.ProductDto;
+import ru.yandex.practicum.commerce.api.store.enums.QuantityState;
 import ru.yandex.practicum.commerce.shoppingstore.entity.Product;
-import ru.yandex.practicum.commerce.shoppingstore.entity.ProductCategory;
-import ru.yandex.practicum.commerce.shoppingstore.entity.ProductState;
-import ru.yandex.practicum.commerce.shoppingstore.entity.dto.ProductDto;
-import ru.yandex.practicum.commerce.shoppingstore.enums.QuantityState;
+import ru.yandex.practicum.commerce.api.store.enums.ProductCategory;
+import ru.yandex.practicum.commerce.api.store.enums.ProductState;
 import ru.yandex.practicum.commerce.shoppingstore.mapper.ProductMapper;
 import ru.yandex.practicum.commerce.shoppingstore.repository.ProductRepository;
 
@@ -90,7 +90,7 @@ public class ProductService {
         if (productDto.getProductCategory() != null) {
             product.setProductCategory(productDto.getProductCategory());
         }
-        if (productDto.getPrice() != null && productDto.getPrice().compareTo(BigDecimal.ONE) >= 0) {
+        if (productDto.getPrice() != null && productDto.getPrice() >= 0) {
             product.setPrice(productDto.getPrice());
         }
     }
