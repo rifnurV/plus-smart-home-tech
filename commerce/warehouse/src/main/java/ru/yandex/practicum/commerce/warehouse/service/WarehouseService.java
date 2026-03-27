@@ -5,18 +5,18 @@ import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.api.cart.dto.ShoppingCartDto;
+import ru.yandex.practicum.commerce.api.warehouse.dto.AddProductToWarehouseRequest;
+import ru.yandex.practicum.commerce.api.warehouse.dto.AddressDto;
+import ru.yandex.practicum.commerce.api.warehouse.dto.BookedProductsDto;
+import ru.yandex.practicum.commerce.api.warehouse.dto.NewProductInWarehouseRequest;
 import ru.yandex.practicum.commerce.warehouse.entity.BookedProducts;
 import ru.yandex.practicum.commerce.warehouse.entity.WarehouseProduct;
-import ru.yandex.practicum.commerce.warehouse.entity.dto.AddProductToWarehouseRequest;
-import ru.yandex.practicum.commerce.warehouse.entity.dto.AddressDto;
-import ru.yandex.practicum.commerce.warehouse.entity.dto.BookedProductsDto;
-import ru.yandex.practicum.commerce.warehouse.entity.dto.NewProductInWarehouseRequest;
 import ru.yandex.practicum.commerce.warehouse.mapper.WarehouseMapper;
 import ru.yandex.practicum.commerce.warehouse.repository.WarehouseRepository;
 
 import java.security.SecureRandom;
-import java.util.Random;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -63,5 +63,15 @@ public class WarehouseService {
 
     public AddressDto getWarehouseAddress() throws FeignException {
         return new AddressDto(CURRENT_ADDRESS, CURRENT_ADDRESS, CURRENT_ADDRESS, CURRENT_ADDRESS, CURRENT_ADDRESS);
+    }
+
+    public void returnProductsToWarehouse(Map<UUID, Long> products) throws FeignException {
+        List<WarehouseProduct> warehouseProducts = warehouseRepository.findAllById(products.keySet());
+        if (warehouseProducts.isEmpty()) {
+            return;
+        }
+        warehouseProducts.forEach(warehouseProduct -> {warehouseProduct.setQuantity(warehouseProduct.getQuantity() +
+                products.get(warehouseProduct.getProductId()));});
+        warehouseRepository.saveAll(warehouseProducts);
     }
 }

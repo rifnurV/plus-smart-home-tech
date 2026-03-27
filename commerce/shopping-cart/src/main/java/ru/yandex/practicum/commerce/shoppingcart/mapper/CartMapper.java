@@ -4,8 +4,9 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import ru.yandex.practicum.commerce.api.cart.dto.ShoppingCartDto;
 import ru.yandex.practicum.commerce.shoppingcart.entity.ShoppingCart;
-import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ShoppingCartDto;
+
 
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)

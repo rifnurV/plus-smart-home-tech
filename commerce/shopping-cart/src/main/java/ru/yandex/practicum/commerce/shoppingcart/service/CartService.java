@@ -5,10 +5,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
+import ru.yandex.practicum.commerce.api.cart.dto.ChangeProductQuantityRequest;
+import ru.yandex.practicum.commerce.api.cart.dto.ShoppingCartDto;
 import ru.yandex.practicum.commerce.shoppingcart.entity.ShoppingCart;
-import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ChangeProductQuantityRequest;
-import ru.yandex.practicum.commerce.shoppingcart.entity.dto.ShoppingCartDto;
 import ru.yandex.practicum.commerce.shoppingcart.mapper.CartMapper;
 import ru.yandex.practicum.commerce.shoppingcart.repository.CartRepository;
 
